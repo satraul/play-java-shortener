@@ -1,20 +1,13 @@
 package controllers;
 
 import models.Link;
-import play.libs.Json;
-import play.mvc.*;
 import models.*;
-import play.data.FormFactory;
 import play.libs.concurrent.HttpExecutionContext;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
 import javax.inject.Inject;
-import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
-
-import static play.libs.Json.toJson;
 
 /**
  * This controller contains an action to handle HTTP requests
@@ -60,9 +53,14 @@ public class HomeController extends Controller {
     }
 
     public Result getLink(String slug) {
+        String url;
         try {
-            return permanentRedirect(linkRepository.findBySlug(slug).toCompletableFuture().get().getLink());
-        } catch (Exception e) {
+            url = linkRepository.findBySlug(slug).toCompletableFuture().get().getLink();
+            if (!"^\\w+://.*".matches(url.toLowerCase())) {
+                url = "http://" + url;
+            }
+            return movedPermanently(url);
+        } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
         return internalServerError("getLink failed");
