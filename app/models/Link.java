@@ -48,11 +48,12 @@ public class Link {
         this.slug = slug;
     }
 
-    public void updateSlug() {
+    public Link updateSlug() {
         if (this.id == null){
             throw new NullPointerException(String.format("id of %s is null", this.link));
         }
         this.slug = Convert.encode(this.id);
+        return this;
     }
 
     public String toJson() {
